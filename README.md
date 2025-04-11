@@ -40,28 +40,37 @@ The deployment uses the following high-level architecture:
 ### Architecture Diagram
 
 ```mermaid
-graph TD
-    subgraph "AWS Cloud"
-        subgraph "VPC"
-            subgraph "Private Subnet"
-                subgraph "ECS Cluster"
-                    subgraph "Fargate Task"
-                        PG[PostgreSQL Container<br/>(512 CPU, 1GB RAM)] --> |Provides DB| CONDUKTOR
-                        CONDUKTOR[Conduktor Console Container<br/>(1.5 vCPU, 3GB RAM)] --> |Metrics| MONITORING
-                        MONITORING[Conduktor Monitoring Container<br/>(0.5 vCPU, 1GB RAM)]
-                    end
-                end
-                EFS[Amazon EFS<br/>(Persistent Storage)] --- |Mount| PG
-            end
-            SG[Security Group] --- |Controls Traffic| Fargate
-        end
-        SECRETS[AWS Secrets Manager<br/>(Credentials)] --> |Provides Secrets| Fargate
-        LOGS[CloudWatch Logs] <-- |Container Logs| Fargate
-        EVENTS[EventBridge Rules<br/>(Start/Stop Schedule)] --> |Manages| Fargate
-    end
-    KAFKA[Kafka Clusters] <-- |Manages & Monitors| CONDUKTOR
-    USER[Users] --> |Access UI<br/>Port 8080| CONDUKTOR
-    ADMIN[Administrators] --> |Configure| CONDUKTOR
+mindmap
+  root((Conduktor on AWS))
+    AWS Cloud
+      VPC
+        Private Subnet
+          ECS Cluster
+            Fargate Task
+              PostgreSQL Container
+                512 CPU, 1GB RAM
+              Conduktor Console Container
+                1.5 vCPU, 3GB RAM
+              Monitoring Container
+                0.5 vCPU, 1GB RAM
+          EFS
+            Persistent Storage
+        Security Group
+          Controls Traffic
+    AWS Services
+      Secrets Manager
+        Credentials
+      CloudWatch
+        Logs
+      EventBridge
+        Start/Stop Schedule
+    External
+      Kafka Clusters
+        Managed & Monitored
+      Users
+        Port 8080
+      Administrators
+        Configuration
 ```
 
 The diagram shows how the three containers interact within a single Fargate task, using EFS for persistence and connecting to external Kafka clusters for management.
