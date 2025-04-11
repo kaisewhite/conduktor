@@ -40,47 +40,28 @@ The deployment uses the following high-level architecture:
 ### Architecture Diagram
 
 ```mermaid
-architecture
-  title Conduktor on AWS
-
-  %% AWS Cloud
-  group(AWS Cloud)
-    group(VPC)
-      group("Private Subnet")
-        group("ECS Cluster")
-          group("Fargate Task")
-            [PostgreSQL Container] as PG
-            [Conduktor Console Container] as CONDUKTOR
-            [Monitoring Container] as MONITORING
-          end
-          [Amazon EFS] as EFS
+graph TD
+    subgraph AWS_Cloud
+        subgraph VPC
+            subgraph Private_Subnet
+                subgraph ECS_Cluster
+                    subgraph Fargate_Task
+                        PG[PostgreSQL Container] --> CONDUKTOR
+                        CONDUKTOR[Conduktor Console Container] --> MONITORING
+                        MONITORING[Monitoring Container]
+                    end
+                    EFS[Amazon EFS] --> PG
+                end
+                SG[Security Group] --> Fargate
+            end
         end
-        [Security Group] as SG
-      end
+        SECRETS[AWS Secrets Manager] --> Fargate
+        LOGS[CloudWatch Logs] <-- Fargate
+        EVENTS[EventBridge Rules] --> Fargate
     end
-
-    %% AWS Services
-    [AWS Secrets Manager] as SECRETS
-    [CloudWatch Logs] as LOGS
-    [EventBridge Rules] as EVENTS
-  end
-
-  %% External Components
-  [Kafka Clusters] as KAFKA
-  [Users] as USER
-  [Administrators] as ADMIN
-
-  %% Relationships
-  PG --> CONDUKTOR
-  CONDUKTOR --> MONITORING
-  EFS --> PG
-  SG --> Fargate
-  SECRETS --> Fargate
-  LOGS <-- Fargate
-  EVENTS --> Fargate
-  KAFKA <-- CONDUKTOR
-  USER --> CONDUKTOR
-  ADMIN --> CONDUKTOR
+    KAFKA[Kafka Clusters] --> CONDUKTOR
+    USER[Users] --> CONDUKTOR
+    ADMIN[Administrators] --> CONDUKTOR
 ```
 
 The diagram shows how the three containers interact within a single Fargate task, using EFS for persistence and connecting to external Kafka clusters for management.
