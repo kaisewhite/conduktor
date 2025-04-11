@@ -40,15 +40,15 @@ The deployment uses the following high-level architecture:
 ### Architecture Diagram
 
 ```mermaid
-architecture-beta
+architecture
   title Conduktor on AWS
 
   %% AWS Cloud
-  group AWS Cloud
-    group VPC
-      group "Private Subnet"
-        group "ECS Cluster"
-          group "Fargate Task"
+  group(AWS Cloud)
+    group(VPC)
+      group("Private Subnet")
+        group("ECS Cluster")
+          group("Fargate Task")
             [PostgreSQL Container] as PG
             [Conduktor Console Container] as CONDUKTOR
             [Monitoring Container] as MONITORING
