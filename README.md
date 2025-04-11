@@ -41,27 +41,51 @@ The deployment uses the following high-level architecture:
 
 ```mermaid
 graph TD
-    subgraph AWS_Cloud
-        subgraph VPC
-            subgraph Private_Subnet
-                subgraph ECS_Cluster
-                    subgraph Fargate_Task
+    classDef aws fill:#232F3E,stroke:#fff,stroke-width:2px
+    classDef awsService fill:#FF9900,stroke:#fff,stroke-width:2px
+    classDef awsResource fill:#527FFF,stroke:#fff,stroke-width:2px
+    classDef external fill:#427AB3,stroke:#fff,stroke-width:2px
+    classDef container fill:#2E8651,stroke:#fff,stroke-width:2px
+
+    subgraph AWS_Cloud["AWS Cloud"]
+        class AWS_Cloud aws
+        subgraph VPC["VPC"]
+            class VPC aws
+            subgraph Private_Subnet["Private Subnet"]
+                class Private_Subnet aws
+                subgraph ECS_Cluster["ECS Cluster"]
+                    class ECS_Cluster aws
+                    subgraph Fargate_Task["Fargate Task"]
+                        class Fargate_Task aws
                         PG[PostgreSQL Container] --> CONDUKTOR
                         CONDUKTOR[Conduktor Console Container] --> MONITORING
                         MONITORING[Monitoring Container]
+                        class PG,CONDUKTOR,MONITORING container
                     end
                     EFS[Amazon EFS] --> PG
+                    class EFS awsResource
                 end
                 SG[Security Group] --> Fargate
+                class SG awsResource
             end
         end
         SECRETS[AWS Secrets Manager] --> Fargate
         LOGS[CloudWatch Logs] <-- Fargate
         EVENTS[EventBridge Rules] --> Fargate
+        class SECRETS,LOGS,EVENTS awsService
     end
     KAFKA[Kafka Clusters] --> CONDUKTOR
     USER[Users] --> CONDUKTOR
     ADMIN[Administrators] --> CONDUKTOR
+    class KAFKA,USER,ADMIN external
+
+    style AWS_Cloud fill:#232F3E,stroke:#fff,stroke-width:2px,font-size:14px
+    style VPC fill:#232F3E,stroke:#fff,stroke-width:2px,font-size:14px
+    style Private_Subnet fill:#232F3E,stroke:#fff,stroke-width:2px,font-size:14px
+    style ECS_Cluster fill:#232F3E,stroke:#fff,stroke-width:2px,font-size:14px
+    style Fargate_Task fill:#232F3E,stroke:#fff,stroke-width:2px,font-size:14px
+
+    linkStyle default stroke:#fff,stroke-width:2px
 ```
 
 The diagram shows how the three containers interact within a single Fargate task, using EFS for persistence and connecting to external Kafka clusters for management.
