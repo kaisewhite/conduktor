@@ -57,7 +57,7 @@ graph TD
         end
         SECRETS["AWS Secrets Manager\n(Credentials)"] --> |Provides Secrets| Fargate
         LOGS["CloudWatch Logs"] <-- |Container Logs| Fargate
-        EVENTS["EventBridge Rules\n(Start/Stop Schedule)"] --> |Manages| Fargate
+        EVENTS("EventBridge Rules\n(Start/Stop Schedule)") --> |Manages| Fargate
     end
     KAFKA["Kafka Clusters"] <-- |Manages & Monitors| CONDUKTOR
     USER["Users"] --> |Access UI\nPort 8080| CONDUKTOR
